@@ -189,11 +189,11 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
             <CardTitle className="flex items-center justify-between">
               <span className="text-lg">Новый товар</span>
               <div className="flex gap-2">
-                <Button onClick={handleSave} size="sm">
+                <Button type="button" onClick={handleSave} size="sm">
                   <Icon name="Check" size={16} />
                   Сохранить
                 </Button>
-                <Button onClick={handleCancel} variant="outline" size="sm">
+                <Button type="button" onClick={handleCancel} variant="outline" size="sm">
                   Отмена
                 </Button>
               </div>
@@ -228,7 +228,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                 <Input
                   type="number"
                   value={formData.price || ''}
-                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value ? Number(e.target.value) : undefined })}
                   placeholder="Введите цену"
                 />
               </div>
