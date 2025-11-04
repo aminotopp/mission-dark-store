@@ -65,7 +65,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.image || formData.price === 0) {
+    if (!formData.name || !formData.image || !formData.price) {
       toast({
         title: 'Ошибка',
         description: 'Заполните все обязательные поля',
