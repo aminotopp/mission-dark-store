@@ -66,27 +66,50 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
 
   const handleSave = async () => {
     const price = Number(formData.price);
+    
+    console.log('Проверка данных:', {
+      name: formData.name,
+      image: formData.image,
+      price: formData.price,
+      priceNumber: price
+    });
+    
     if (!formData.name?.trim() || !formData.image || !price || price <= 0) {
+      const missing = [];
+      if (!formData.name?.trim()) missing.push('название');
+      if (!formData.image) missing.push('фото');
+      if (!price || price <= 0) missing.push('цена');
+      
       toast({
         title: 'Ошибка',
-        description: 'Заполните все обязательные поля и укажите корректную цену',
+        description: `Заполните: ${missing.join(', ')}`,
         variant: 'destructive'
       });
       return;
     }
 
     try {
+      const payload = {
+        action: isAdding ? 'add_product' : 'update_product',
+        id: editingProduct?.id,
+        name: formData.name,
+        price: price,
+        description: formData.description || '',
+        sizes: formData.sizes || ['S', 'M', 'L', 'XL'],
+        image: formData.image,
+        inStock: formData.inStock !== false
+      };
+      
+      console.log('Отправка данных:', payload);
+      
       const response = await fetch('https://functions.poehali.dev/f1b7ce7b-2c2f-4c89-a900-04a965ca2175', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: isAdding ? 'add_product' : 'update_product',
-          id: editingProduct?.id,
-          ...formData
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
+      console.log('Ответ сервера:', data);
 
       if (data.success) {
         toast({
@@ -96,8 +119,15 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
         setEditingProduct(null);
         setIsAdding(false);
         onUpdate();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось сохранить товар',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
+      console.error('Ошибка сохранения:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось сохранить товар',
