@@ -56,7 +56,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
     setIsAdding(true);
     setFormData({
       name: '',
-      price: 0,
+      price: undefined,
       description: '',
       sizes: ['S', 'M', 'L', 'XL'],
       image: '',
@@ -65,7 +65,8 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.image || !formData.price || formData.price <= 0) {
+    const price = Number(formData.price);
+    if (!formData.name?.trim() || !formData.image || !price || price <= 0) {
       toast({
         title: 'Ошибка',
         description: 'Заполните все обязательные поля и укажите корректную цену',
