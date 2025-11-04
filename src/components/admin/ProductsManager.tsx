@@ -65,10 +65,10 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.image || !formData.price) {
+    if (!formData.name || !formData.image || !formData.price || formData.price <= 0) {
       toast({
         title: 'Ошибка',
-        description: 'Заполните все обязательные поля',
+        description: 'Заполните все обязательные поля и укажите корректную цену',
         variant: 'destructive'
       });
       return;
@@ -196,9 +196,9 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                 <Label>Цена (₽) *</Label>
                 <Input
                   type="number"
-                  value={formData.price || 0}
-                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
-                  placeholder="0"
+                  value={formData.price || ''}
+                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
+                  placeholder="Введите цену"
                 />
               </div>
               <div>
@@ -286,8 +286,8 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                   <Label>Цена (₽)</Label>
                   <Input
                     type="number"
-                    value={formData.price || 0}
-                    onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                    value={formData.price || ''}
+                    onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
                   />
                 </div>
                 <div>
