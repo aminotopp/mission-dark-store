@@ -249,11 +249,16 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                   {formData.image && (
                     <img src={formData.image} alt="Preview" className="w-full h-48 object-cover rounded-md" />
                   )}
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
+                  <label className="flex items-center justify-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <Icon name="Upload" size={16} />
+                    Выбрать файл
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
                   <p className="text-xs text-muted-foreground">Макс. размер: 5МБ. Форматы: JPG, PNG, WebP</p>
                 </div>
               </div>
@@ -278,12 +283,17 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                       ))}
                     </div>
                   )}
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleAdditionalImagesChange}
-                  />
+                  <label className="flex items-center justify-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <Icon name="ImagePlus" size={16} />
+                    Выбор файлов
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleAdditionalImagesChange}
+                      className="hidden"
+                    />
+                  </label>
                   <p className="text-xs text-muted-foreground">Можно выбрать несколько файлов. Макс. размер каждого: 5МБ</p>
                 </div>
               </div>
