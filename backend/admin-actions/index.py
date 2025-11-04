@@ -96,6 +96,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         sizes = body_data.get('sizes', ['S', 'M', 'L', 'XL'])
         image = body_data.get('image')
         in_stock = body_data.get('inStock', True)
+        category = body_data.get('category', 'Основное')
         
         if not all([name, price, image]):
             conn.close()
@@ -110,9 +111,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         cursor.execute('''
-            INSERT INTO t_p54427834_mission_dark_store.products (name, price, description, sizes, image, in_stock)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        ''', (name, price, description, sizes, image, in_stock))
+            INSERT INTO t_p54427834_mission_dark_store.products (id, name, price, description, sizes, image, in_stock, category)
+            VALUES (gen_random_uuid()::text, %s, %s, %s, %s, %s, %s, %s)
+        ''', (name, price, description, sizes, image, in_stock, category))
         
         conn.commit()
         cursor.close()
