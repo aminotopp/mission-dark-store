@@ -95,6 +95,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         description = body_data.get('description', '')
         sizes = body_data.get('sizes', ['S', 'M', 'L', 'XL'])
         image = body_data.get('image')
+        images = body_data.get('images', [])
         in_stock = body_data.get('inStock', True)
         category = body_data.get('category', 'Основное')
         
@@ -111,9 +112,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         cursor.execute('''
-            INSERT INTO t_p54427834_mission_dark_store.products (id, name, price, description, sizes, image, in_stock, category)
-            VALUES (gen_random_uuid()::text, %s, %s, %s, %s, %s, %s, %s)
-        ''', (name, price, description, sizes, image, in_stock, category))
+            INSERT INTO t_p54427834_mission_dark_store.products (id, name, price, description, sizes, image, images, in_stock, category)
+            VALUES (gen_random_uuid()::text, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (name, price, description, sizes, image, images, in_stock, category))
         
         conn.commit()
         cursor.close()
@@ -160,6 +161,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if 'image' in body_data:
             update_fields.append('image = %s')
             params.append(body_data['image'])
+        
+        if 'images' in body_data:
+            update_fields.append('images = %s')
+            params.append(body_data['images'])
         
         update_fields.append('updated_at = CURRENT_TIMESTAMP')
         params.append(item_id)

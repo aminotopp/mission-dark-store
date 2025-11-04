@@ -28,6 +28,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
       description: product.description,
       sizes: product.sizes,
       image: product.image,
+      images: product.images || [],
       inStock: product.inStock !== false
     });
   };
@@ -52,6 +53,45 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
     reader.readAsDataURL(file);
   };
 
+  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newImages: string[] = [];
+    let processedCount = 0;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Ошибка',
+          description: `Файл ${file.name} слишком большой (макс. 5МБ)`,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newImages.push(reader.result as string);
+        processedCount++;
+        
+        if (processedCount === files.length) {
+          setFormData({ 
+            ...formData, 
+            images: [...(formData.images || []), ...newImages]
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    const newImages = [...(formData.images || [])];
+    newImages.splice(index, 1);
+    setFormData({ ...formData, images: newImages });
+  };
+
   const handleAddNew = () => {
     setIsAdding(true);
     setFormData({
@@ -60,6 +100,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
       description: '',
       sizes: ['S', 'M', 'L', 'XL'],
       image: '',
+      images: [],
       inStock: true
     });
   };
@@ -97,6 +138,7 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
         description: formData.description || '',
         sizes: formData.sizes || ['S', 'M', 'L', 'XL'],
         image: formData.image,
+        images: formData.images || [],
         inStock: formData.inStock !== false
       };
       
@@ -213,6 +255,36 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                     onChange={handleImageChange}
                   />
                   <p className="text-xs text-muted-foreground">Макс. размер: 5МБ. Форматы: JPG, PNG, WebP</p>
+                </div>
+              </div>
+              <div>
+                <Label>Дополнительные фото</Label>
+                <div className="space-y-2">
+                  {formData.images && formData.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.images.map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={img} alt={`Photo ${idx + 1}`} className="w-full h-24 object-cover rounded-md" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                            onClick={() => removeAdditionalImage(idx)}
+                          >
+                            <Icon name="X" size={14} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleAdditionalImagesChange}
+                  />
+                  <p className="text-xs text-muted-foreground">Можно выбрать несколько файлов. Макс. размер каждого: 5МБ</p>
                 </div>
               </div>
               <div>
