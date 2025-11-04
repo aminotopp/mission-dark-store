@@ -204,6 +204,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cursor.execute("DELETE FROM t_p54427834_mission_dark_store.orders WHERE id = %s", (item_id,))
         elif item_type == 'message':
             cursor.execute("DELETE FROM t_p54427834_mission_dark_store.contact_messages WHERE id = %s", (item_id,))
+        elif item_type == 'product':
+            cursor.execute("DELETE FROM t_p54427834_mission_dark_store.products WHERE id = %s", (item_id,))
         else:
             conn.close()
             return {

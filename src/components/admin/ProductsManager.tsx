@@ -111,6 +111,38 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
     setFormData({});
   };
 
+  const handleDelete = async (productId: number) => {
+    if (!confirm('Удалить этот товар?')) return;
+
+    try {
+      const response = await fetch('https://functions.poehali.dev/f1b7ce7b-2c2f-4c89-a900-04a965ca2175', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          type: 'product',
+          id: productId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Готово',
+          description: 'Товар удален'
+        });
+        onUpdate();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить товар',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -214,10 +246,15 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
                   </Button>
                 </div>
               ) : (
-                <Button onClick={() => handleEdit(product)} variant="outline" size="sm">
-                  <Icon name="Pencil" size={16} />
-                  Редактировать
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={() => handleEdit(product)} variant="outline" size="sm">
+                    <Icon name="Pencil" size={16} />
+                    Редактировать
+                  </Button>
+                  <Button onClick={() => handleDelete(product.id)} variant="destructive" size="sm">
+                    <Icon name="Trash2" size={16} />
+                  </Button>
+                </div>
               )}
             </CardTitle>
           </CardHeader>
