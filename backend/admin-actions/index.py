@@ -81,9 +81,52 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    # Handle delete, update_status and update_product actions
+    # Handle delete, update_status, update_product and add_product actions
     item_type = body_data.get('type')
     item_id = body_data.get('id')
+    
+    if action == 'add_product':
+        database_url = os.environ.get('DATABASE_URL')
+        conn = psycopg2.connect(database_url)
+        cursor = conn.cursor()
+        
+        name = body_data.get('name')
+        price = body_data.get('price')
+        description = body_data.get('description', '')
+        sizes = body_data.get('sizes', ['S', 'M', 'L', 'XL'])
+        image = body_data.get('image')
+        in_stock = body_data.get('inStock', True)
+        
+        if not all([name, price, image]):
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': 'Missing required fields: name, price, image'}),
+                'isBase64Encoded': False
+            }
+        
+        cursor.execute('''
+            INSERT INTO t_p54427834_mission_dark_store.products (name, price, description, sizes, image, in_stock)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        ''', (name, price, description, sizes, image, in_stock))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({'success': True, 'message': 'Product added'}),
+            'isBase64Encoded': False
+        }
     
     if action == 'update_product':
         database_url = os.environ.get('DATABASE_URL')

@@ -17,6 +17,7 @@ interface ProductsManagerProps {
 export default function ProductsManager({ products, onUpdate }: ProductsManagerProps) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<Partial<Product>>({});
+  const [isAdding, setIsAdding] = useState(false);
   const { toast } = useToast();
 
   const handleEdit = (product: Product) => {
@@ -51,16 +52,35 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
     reader.readAsDataURL(file);
   };
 
+  const handleAddNew = () => {
+    setIsAdding(true);
+    setFormData({
+      name: '',
+      price: 0,
+      description: '',
+      sizes: ['S', 'M', 'L', 'XL'],
+      image: '',
+      inStock: true
+    });
+  };
+
   const handleSave = async () => {
-    if (!editingProduct) return;
+    if (!formData.name || !formData.image || formData.price === 0) {
+      toast({
+        title: 'Ошибка',
+        description: 'Заполните все обязательные поля',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     try {
       const response = await fetch('https://functions.poehali.dev/f1b7ce7b-2c2f-4c89-a900-04a965ca2175', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'update_product',
-          id: editingProduct.id,
+          action: isAdding ? 'add_product' : 'update_product',
+          id: editingProduct?.id,
           ...formData
         })
       });
@@ -70,15 +90,16 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
       if (data.success) {
         toast({
           title: 'Готово',
-          description: 'Товар обновлен'
+          description: isAdding ? 'Товар добавлен' : 'Товар обновлен'
         });
         setEditingProduct(null);
+        setIsAdding(false);
         onUpdate();
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось обновить товар',
+        description: 'Не удалось сохранить товар',
         variant: 'destructive'
       });
     }
@@ -86,11 +107,97 @@ export default function ProductsManager({ products, onUpdate }: ProductsManagerP
 
   const handleCancel = () => {
     setEditingProduct(null);
+    setIsAdding(false);
     setFormData({});
   };
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button onClick={handleAddNew} disabled={isAdding || editingProduct !== null}>
+          <Icon name="Plus" size={16} />
+          Добавить товар
+        </Button>
+      </div>
+
+      {isAdding && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="text-lg">Новый товар</span>
+              <div className="flex gap-2">
+                <Button onClick={handleSave} size="sm">
+                  <Icon name="Check" size={16} />
+                  Сохранить
+                </Button>
+                <Button onClick={handleCancel} variant="outline" size="sm">
+                  Отмена
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label>Главное фото *</Label>
+                <div className="space-y-2">
+                  {formData.image && (
+                    <img src={formData.image} alt="Preview" className="w-full h-48 object-cover rounded-md" />
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                  <p className="text-xs text-muted-foreground">Макс. размер: 5МБ. Форматы: JPG, PNG, WebP</p>
+                </div>
+              </div>
+              <div>
+                <Label>Название *</Label>
+                <Input
+                  value={formData.name || ''}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Введите название товара"
+                />
+              </div>
+              <div>
+                <Label>Цена (₽) *</Label>
+                <Input
+                  type="number"
+                  value={formData.price || 0}
+                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>Описание</Label>
+                <Textarea
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  placeholder="Опишите товар"
+                />
+              </div>
+              <div>
+                <Label>Размеры (через запятую)</Label>
+                <Input
+                  value={formData.sizes?.join(', ') || ''}
+                  onChange={(e) => setFormData({ ...formData, sizes: e.target.value.split(',').map(s => s.trim()) })}
+                  placeholder="S, M, L, XL"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.inStock !== false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, inStock: checked })}
+                />
+                <Label>В наличии</Label>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {products.map((product) => (
         <Card key={product.id}>
           <CardHeader>
